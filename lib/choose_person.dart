@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:urodziny_app/events.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 
 class ChoosePerson extends StatefulWidget {
@@ -10,7 +9,7 @@ class ChoosePerson extends StatefulWidget {
 class _ChoosePersonState extends State<ChoosePerson> {
   List<Contact>? _contacts;
   bool _permissionDenied = false;
-
+  Map<String, String> chosenContact = {"name": 'NoName', "phone": 'NoPhone'};
   @override
   void initState() {
     super.initState();
@@ -27,12 +26,12 @@ class _ChoosePersonState extends State<ChoosePerson> {
   }
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-    home: Scaffold(
-      appBar: AppBar(title: Text('flutter_contacts_example')),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Kontakty')),
       body: _body(),
-    ),
-  );
+    );
+  }
 
   Widget _body() {
     if (_permissionDenied) return Center(child: Text('Permission denied'));
@@ -45,9 +44,11 @@ class _ChoosePersonState extends State<ChoosePerson> {
           final fullContact = await FlutterContacts.getContact(
             _contacts![i].id,
           );
-          await Navigator.of(
+          chosenContact = await Navigator.push(
             context,
-          ).push(MaterialPageRoute(builder: (_) => ContactPage(fullContact!)));
+            MaterialPageRoute(builder: (context) => ContactPage(fullContact!)),
+          );
+          Navigator.pop(context, chosenContact);
         },
       ),
     );
@@ -63,13 +64,22 @@ class ContactPage extends StatelessWidget {
     appBar: AppBar(title: Text(contact.displayName)),
     body: Column(
       children: [
-        Text('First name: ${contact.name.first}'),
-        Text('Last name: ${contact.name.last}'),
-        Text(
-          'Phone number: ${contact.phones.isNotEmpty ? contact.phones.first.number : '(none)'}',
-        ),
-        Text(
-          'Email address: ${contact.emails.isNotEmpty ? contact.emails.first.address : '(none)'}',
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+          height: 205.0,
+          width: 333.0,
+          child: ListView.builder(
+            itemCount: contact.phones.length,
+            itemBuilder: (context, i) => ListTile(
+              title: Text(contact.phones[i].number),
+              onTap: () async {
+                Navigator.pop(context, {
+                  "name": contact.displayName,
+                  "phone": contact.phones[i].number,
+                });
+              },
+            ),
+          ),
         ),
       ],
     ),

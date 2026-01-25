@@ -4,8 +4,9 @@ import 'package:table_calendar/table_calendar.dart';
 /// Example event class.
 class Event {
   final String name;
-  final String wishes;
-  const Event(this.name, [this.wishes = 'No wishes']);
+  final String phone;
+  String wishes;
+  Event(this.name, [this.phone = 'No number', this.wishes = 'No wishes']);
 
   @override
   String toString() => name;

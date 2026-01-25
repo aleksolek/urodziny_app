@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:urodziny_app/events.dart';
 import 'package:urodziny_app/app.dart';
 
-class AddBirthday extends StatelessWidget {
+class AddBirthday extends StatefulWidget {
   final DateTime _day;
-
   AddBirthday(this._day);
   @override
+  _AddBirthdayState createState() => _AddBirthdayState();
+}
+
+class _AddBirthdayState extends State<AddBirthday> {
+  Map<String, String> receivedContact = {"name": '', "phone": ''};
+  @override
   Widget build(BuildContext context) {
-    final GlobalKey<FormState> formKey = GlobalKey();
-    final nameController = TextEditingController();
     final wishesController = TextEditingController();
     return Scaffold(
       appBar: AppBar(title: Text('Dodaj urodziny')),
@@ -17,50 +20,71 @@ class AddBirthday extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('$_day'),
-          Form(
-            key: formKey,
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: nameController,
-                  decoration: const InputDecoration(label: Text('Imie')),
+          Text('Data urodzin: ${widget._day.day}/${widget._day.month}'),
+          Text('Imie: ${receivedContact["name"]}'),
+          Text('Telefon: ${receivedContact["phone"]}'),
+          Column(
+            children: [
+              TextField(
+                controller: wishesController,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  hintText: "Wpisz zyczenia",
+                  hintStyle: TextStyle(color: Colors.grey),
                 ),
-                TextFormField(
-                  controller: wishesController,
-                  decoration: const InputDecoration(label: Text('Zyczenia')),
+              ),
+              ElevatedButton(
+                onPressed: () => _onChoosePersonPress(context),
+                child: Text('Wybierz z kontaktow'),
+              ),
+              ElevatedButton(
+                onPressed: () => _onSavePress(
+                  receivedContact["name"] as String,
+                  receivedContact["phone"] as String,
+                  wishesController.text,
                 ),
-                ElevatedButton(
-                  onPressed: () => _onChoosePersonPress(context),
-                  child: Text('Wybierz z kontaktow'),
-                ),
-                ElevatedButton(
-                  onPressed: () =>
-                      _onSavePress(nameController.text, wishesController.text),
-                  child: Text('Zapisz'),
-                ),
-              ],
-            ),
+                child: Text('Zapisz'),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  _onSavePress(String name, String wishes) {
-    Event birthday = Event(name, wishes);
-    if (kEvents[_day] == null) {
+  Widget okButton = TextButton(child: Text("OK"), onPressed: () {});
+
+  _onSavePress(String name, String phone, String wishes) {
+    if (name == "" || phone == "" || wishes == "") {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text("Puste pola"),
+          content: Text("Niektore pola sa puste"),
+          actions: [okButton],
+        ),
+      );
+      return;
+    }
+    Event birthday = Event(name, phone, wishes);
+    if (kEvents[widget._day] == null) {
       print('Lista na ten dzien nie istnieje jeszcze');
       final growableList = List<Event>.empty(growable: true);
       growableList.add(birthday);
-      kEvents[_day] = growableList;
+      kEvents[widget._day] = growableList;
     } else {
-      kEvents[_day]?.add(birthday);
+      kEvents[widget._day]?.add(birthday);
       print(birthday);
     }
+    Navigator.pop(context);
   }
 
-  _onChoosePersonPress(BuildContext context) {
-    Navigator.pushNamed(context, ChoosePersonRoute);
+  _onChoosePersonPress(BuildContext context) async {
+    final result = await Navigator.pushNamed(context, ChoosePersonRoute);
+    if (result != null) {
+      setState(() {
+        receivedContact = result as Map<String, String>;
+      });
+    }
   }
 }

@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'calendar.dart';
 import 'add_birthday.dart';
 import 'choose_person.dart';
+import 'edit_event.dart';
 import 'style.dart';
 
 const CalendarRoute = '/';
 const AddBirthdayRoute = '/add_birthday';
 const ChoosePersonRoute = '/choose_person';
+const EditEventRoute = '/edit_event';
 
 class MyApp extends StatelessWidget {
   const MyApp();
@@ -54,6 +56,11 @@ class MyApp extends StatelessWidget {
           break;
         case ChoosePersonRoute:
           screen = ChoosePerson();
+          break;
+        case EditEventRoute:
+          final Map<String, dynamic> args =
+              settings.arguments as Map<String, dynamic>;
+          screen = EditEvent(args["day"], args["index"]);
           break;
         default:
           return null;

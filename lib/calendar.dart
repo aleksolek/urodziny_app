@@ -84,13 +84,8 @@ class _Calendar extends State<Calendar> {
               return isSameDay(_selectedDay, day);
             },
           ),
-          OutlinedButton(
+          ElevatedButton(
             onPressed: () => _onAddBirthdayTap(context),
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.all(16),
-            ),
             child: Text('Dodaj urodziny'),
           ),
           ValueListenableBuilder<List<Event>>(
@@ -115,6 +110,7 @@ class _Calendar extends State<Calendar> {
                       title: Text(
                         "${value[index]}",
                       ), // Main title text that shows item index.
+                      onTap: () => _onEditEventTap(context, index),
                     );
                   },
                 ),
@@ -129,14 +125,12 @@ class _Calendar extends State<Calendar> {
   _onAddBirthdayTap(BuildContext context) {
     Navigator.pushNamed(context, AddBirthdayRoute, arguments: _selectedDay);
   }
+
+  _onEditEventTap(BuildContext context, int index) {
+    Navigator.pushNamed(
+      context,
+      EditEventRoute,
+      arguments: {"day": _selectedDay, "index": index},
+    );
+  }
 }
-
-
-
-          // ValueListenableBuilder<List<Event>>(
-          //   valueListenable: _selectedEvents,
-          //   builder: (context, value, _) {
-          //     return Text('ELO: ${value.length} ');
-          //   },
-          // ),
-
