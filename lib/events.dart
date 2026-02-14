@@ -13,9 +13,16 @@ class Event {
 }
 
 final kEvents = LinkedHashMap<DateTime, List<Event>>(
-  equals: isSameDay,
+  equals: isSameDayAndMonth,
   hashCode: getHashCode,
 );
 int getHashCode(DateTime key) {
-  return key.day * 1000000 + key.month * 10000 + key.year;
+  return key.day * 100 + key.month;
+}
+
+bool isSameDayAndMonth(DateTime? a, DateTime? b) {
+  if (a == null || b == null) {
+    return false;
+  }
+  return a.month == b.month && a.day == b.day;
 }
