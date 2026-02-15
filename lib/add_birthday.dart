@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:urodziny_app/events.dart';
 import 'package:urodziny_app/app.dart';
+import 'package:urodziny_app/local_notifications.dart';
 
 class AddBirthday extends StatefulWidget {
   final DateTime _day;
@@ -76,6 +77,13 @@ class _AddBirthdayState extends State<AddBirthday> {
       kEvents[widget._day]?.add(birthday);
       print(birthday);
     }
+    int eventNumber = kEvents[widget._day]?.length as int;
+    LocalNotifications.scheduleNotification(
+      widget._day.day,
+      widget._day.month,
+      eventNumber,
+      birthday,
+    );
     Navigator.pop(context);
   }
 

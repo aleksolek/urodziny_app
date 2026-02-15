@@ -3,6 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 
 import 'package:urodziny_app/app.dart';
 import 'package:urodziny_app/events.dart';
+import 'package:urodziny_app/local_notifications.dart';
 
 class Calendar extends StatefulWidget {
   const Calendar({super.key});
