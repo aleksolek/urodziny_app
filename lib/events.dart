@@ -3,10 +3,16 @@ import 'package:table_calendar/table_calendar.dart';
 
 /// Example event class.
 class Event {
+  int id;
   final String name;
   final String phone;
   String wishes;
-  Event(this.name, [this.phone = 'No number', this.wishes = 'No wishes']);
+  Event(
+    this.name, [
+    this.phone = 'No number',
+    this.wishes = 'No wishes',
+    this.id = 0,
+  ]);
 
   @override
   String toString() => name;

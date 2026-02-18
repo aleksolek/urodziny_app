@@ -3,6 +3,8 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:urodziny_app/events.dart';
 
+const int NUMBER_OF_YEARS = 30;
+
 class LocalNotifications {
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -47,12 +49,7 @@ class LocalNotifications {
     );
   }
 
-  static Future scheduleNotification(
-    int day,
-    int month,
-    int eventNumber,
-    Event event,
-  ) async {
+  static Future scheduleNotification(int day, int month, Event event) async {
     const AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
           "scheduled",
@@ -68,9 +65,8 @@ class LocalNotifications {
       iOS: darwinNorificationDetails,
       android: androidNotificationDetails,
     );
-    int eventId = day * 1000000 + month * 10000 + eventNumber * 100;
     print(
-      "Scheduling notification for the day: $day month: $month id: $eventId",
+      "Scheduling notification for the day: $day month: $month id: ${event.id}",
     );
     int year = DateTime.now().year;
     // Prevent scheduling in the past
@@ -79,10 +75,10 @@ class LocalNotifications {
         year++;
       }
     }
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < NUMBER_OF_YEARS; i++) {
       await flutterLocalNotificationsPlugin.zonedSchedule(
-        id: eventId + i,
-        scheduledDate: tz.TZDateTime.local(year, month, day, 18, 34 + i),
+        id: event.id + i,
+        scheduledDate: tz.TZDateTime.local(year, month, day, 10),
         notificationDetails: notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         title: 'Urodziny ${event.name}!',
@@ -91,7 +87,9 @@ class LocalNotifications {
     }
   }
 
-  static Future deleteScheduledNotification() {
-    // IMPLEMENT ME
+  static Future deleteScheduledNotification(int eventId) async {
+    for (var i = 0; i < NUMBER_OF_YEARS; i++) {
+      await flutterLocalNotificationsPlugin.cancel(id: eventId + i);
+    }
   }
 }

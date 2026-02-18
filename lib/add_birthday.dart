@@ -69,19 +69,19 @@ class _AddBirthdayState extends State<AddBirthday> {
     }
     Event birthday = Event(name, phone, wishes);
     if (kEvents[widget._day] == null) {
+      birthday.id = 1;
       print('Lista na ten dzien nie istnieje jeszcze');
       final growableList = List<Event>.empty(growable: true);
       growableList.add(birthday);
       kEvents[widget._day] = growableList;
     } else {
+      birthday.id = generateEventId(widget._day);
       kEvents[widget._day]?.add(birthday);
       print(birthday);
     }
-    int eventNumber = kEvents[widget._day]?.length as int;
     LocalNotifications.scheduleNotification(
       widget._day.day,
       widget._day.month,
-      eventNumber,
       birthday,
     );
     Navigator.pop(context);
@@ -94,5 +94,28 @@ class _AddBirthdayState extends State<AddBirthday> {
         receivedContact = result as Map<String, String>;
       });
     }
+  }
+}
+
+int generateEventId(DateTime key) {
+  int eventId = 0;
+  if (kEvents[key] == null) {
+    eventId = key.day * 1000000 + key.month * 10000 + 1 * 100;
+    return eventId;
+  }
+  int id = 1;
+  while (true) {
+    bool idUsed = false;
+    for (int j = 0; j < kEvents[key]!.length; j++) {
+      if (id == kEvents[key]![j].id) {
+        idUsed = true;
+        break;
+      }
+    }
+    if (!idUsed) {
+      eventId = key.day * 1000000 + key.month * 10000 + id * 100;
+      return eventId;
+    }
+    id++;
   }
 }

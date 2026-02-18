@@ -47,6 +47,8 @@ class _Calendar extends State<Calendar> {
   void _deleteEvent(int index) {
     print("Deleting event index: $index for day $_selectedDay");
     print("${kEvents[_selectedDay]?[index]}");
+    int eventId = kEvents[_selectedDay]![index].id;
+    LocalNotifications.deleteScheduledNotification(eventId);
     kEvents[_selectedDay]?.removeAt(index);
     setState(() {
       _selectedEvents.value = _getEventsForDay(_selectedDay!);
