@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
-
 import 'package:urodziny_app/app.dart';
 import 'package:urodziny_app/events.dart';
 import 'package:urodziny_app/local_notifications.dart';
@@ -13,6 +13,7 @@ class Calendar extends StatefulWidget {
 }
 
 class _Calendar extends State<Calendar> {
+  final _box = Hive.box('birthdayEvents');
   CalendarFormat _calendarFormat = CalendarFormat.month;
 
   late final ValueNotifier<List<Event>> _selectedEvents;
@@ -50,6 +51,7 @@ class _Calendar extends State<Calendar> {
     int eventId = kEvents[_selectedDay]![index].id;
     LocalNotifications.deleteScheduledNotification(eventId);
     kEvents[_selectedDay]?.removeAt(index);
+    _box.put(getHashCode(_selectedDay as DateTime), kEvents[_selectedDay]);
     setState(() {
       _selectedEvents.value = _getEventsForDay(_selectedDay!);
     });

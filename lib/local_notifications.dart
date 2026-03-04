@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:urodziny_app/events.dart';
+import 'package:urodziny_app/url.dart';
+import 'package:url_launcher/link.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 const int NUMBER_OF_YEARS = 30;
 
@@ -22,6 +27,7 @@ class LocalNotifications {
         );
     await flutterLocalNotificationsPlugin.initialize(
       settings: initializationSettings,
+      onDidReceiveNotificationResponse: onClickNotification,
     );
     tz.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation('Europe/Warsaw'));
@@ -75,14 +81,26 @@ class LocalNotifications {
         year++;
       }
     }
+    String fixedPhone = event.phone.replaceAll(RegExp(r'\D'), '');
+    print("To nasz nowy phone: $fixedPhone");
+    print("I zyczenia: ${event.wishes}");
+    String fullPayload = jsonEncode({
+      'phone': fixedPhone,
+      'wishes': event.wishes,
+    });
     for (var i = 0; i < NUMBER_OF_YEARS; i++) {
       await flutterLocalNotificationsPlugin.zonedSchedule(
         id: event.id + i,
-        scheduledDate: tz.TZDateTime.local(year, month, day, 10),
+        // id: event.id,
+        scheduledDate: tz.TZDateTime.local(year + i, month, day, 10),
+        // scheduledDate: tz.TZDateTime.now(
+        //   tz.local,
+        // ).add(const Duration(seconds: 3)),
         notificationDetails: notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         title: 'Urodziny ${event.name}!',
         body: 'Nie zapomnij zlozyc zyczen',
+        payload: fullPayload,
       );
     }
   }
@@ -91,5 +109,34 @@ class LocalNotifications {
     for (var i = 0; i < NUMBER_OF_YEARS; i++) {
       await flutterLocalNotificationsPlugin.cancel(id: eventId + i);
     }
+  }
+
+  static void onClickNotification(
+    NotificationResponse notificationResponse,
+  ) async {
+    print("Notyfikacja kliknieta");
+    var payloadData = jsonDecode(notificationResponse.payload as String);
+    print("Po zdekodowaniu: ${payloadData["wishes"]}");
+    final Uri toLaunch = Uri(
+      scheme: 'https',
+      host: 'wa.me',
+      path: payloadData["phone"],
+      queryParameters: {"text": payloadData["wishes"]},
+    );
+    // Url.LaunchInBrowser(toLaunch);
+    print("Launching");
+    if (!await launchUrl(toLaunch, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $toLaunch');
+    }
+    print("Launched");
+  }
+
+  static String strip(String str, String charactersToRemove) {
+    String escapedChars = RegExp.escape(charactersToRemove);
+    RegExp regex = new RegExp(
+      r"^[" + escapedChars + r"]+|[" + escapedChars + r']+$',
+    );
+    String newStr = str.replaceAll(regex, '').trim();
+    return newStr;
   }
 }

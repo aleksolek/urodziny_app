@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:urodziny_app/events.dart';
 import 'package:urodziny_app/app.dart';
 import 'package:urodziny_app/local_notifications.dart';
@@ -11,6 +12,7 @@ class AddBirthday extends StatefulWidget {
 }
 
 class _AddBirthdayState extends State<AddBirthday> {
+  final _box = Hive.box('birthdayEvents');
   Map<String, String> receivedContact = {"name": '', "phone": ''};
   @override
   Widget build(BuildContext context) {
@@ -79,6 +81,9 @@ class _AddBirthdayState extends State<AddBirthday> {
       kEvents[widget._day]?.add(birthday);
       print(birthday);
     }
+    List<Event> tempList = kEvents[widget._day] as List<Event>;
+    print(tempList);
+    _box.put(getHashCode(widget._day), tempList);
     LocalNotifications.scheduleNotification(
       widget._day.day,
       widget._day.month,

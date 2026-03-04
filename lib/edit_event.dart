@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:urodziny_app/events.dart';
 import 'package:urodziny_app/app.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class EditEvent extends StatefulWidget {
   final DateTime _day;
@@ -10,6 +11,7 @@ class EditEvent extends StatefulWidget {
 }
 
 class _EditEvent extends State<EditEvent> {
+  final _box = Hive.box('birthdayEvents');
   bool isEditActive = false;
   late TextEditingController wishesController;
   Event? currentEvent;
@@ -49,6 +51,7 @@ class _EditEvent extends State<EditEvent> {
       // When we press save:
       if (isEditActive) {
         kEvents[widget._day]?[widget._index].wishes = wishesController.text;
+        _box.put(getHashCode(widget._day), kEvents[widget._day]);
         currentEvent = kEvents[widget._day]?[widget._index];
       }
       isEditActive = !isEditActive;
