@@ -14,6 +14,8 @@ class AddBirthday extends StatefulWidget {
 class _AddBirthdayState extends State<AddBirthday> {
   final _box = Hive.box('birthdayEvents');
   Map<String, String> receivedContact = {"name": '', "phone": ''};
+  bool isOneTimeEvent = false;
+
   @override
   Widget build(BuildContext context) {
     final wishesController = TextEditingController();
@@ -23,11 +25,26 @@ class _AddBirthdayState extends State<AddBirthday> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Data urodzin: ${widget._day.day}/${widget._day.month}'),
+          Text(
+            'Data urodzin: ${widget._day.day}/${widget._day.month}/${widget._day.year}',
+          ),
           Text('Imie: ${receivedContact["name"]}'),
           Text('Telefon: ${receivedContact["phone"]}'),
           Column(
             children: [
+              Row(
+                children: [
+                  Checkbox(
+                    value: isOneTimeEvent,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        isOneTimeEvent = value!;
+                      });
+                    },
+                  ),
+                  Text('Jednorazowe wydarzenie'),
+                ],
+              ),
               TextField(
                 controller: wishesController,
                 maxLines: null,
@@ -58,37 +75,28 @@ class _AddBirthdayState extends State<AddBirthday> {
   Widget okButton = TextButton(child: Text("OK"), onPressed: () {});
 
   _onSavePress(String name, String phone, String wishes) {
-    if (name == "" || phone == "" || wishes == "") {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: Text("Puste pola"),
-          content: Text("Niektore pola sa puste"),
-          actions: [okButton],
-        ),
-      );
-      return;
+    DateTime date = widget._day;
+    Event birthday;
+    if (isOneTimeEvent) {
+      birthday = Event(name, phone, wishes, 0, date.year);
+    } else {
+      birthday = Event(name, phone, wishes);
     }
-    Event birthday = Event(name, phone, wishes);
-    if (kEvents[widget._day] == null) {
+    if (kEvents[date] == null) {
       birthday.id = 1;
       print('Lista na ten dzien nie istnieje jeszcze');
       final growableList = List<Event>.empty(growable: true);
       growableList.add(birthday);
-      kEvents[widget._day] = growableList;
+      kEvents[date] = growableList;
     } else {
-      birthday.id = generateEventId(widget._day);
-      kEvents[widget._day]?.add(birthday);
+      birthday.id = generateEventId(date);
+      kEvents[date]?.add(birthday);
       print(birthday);
     }
-    List<Event> tempList = kEvents[widget._day] as List<Event>;
+    List<Event> tempList = kEvents[date] as List<Event>;
     print(tempList);
-    _box.put(getHashCode(widget._day), tempList);
-    LocalNotifications.scheduleNotification(
-      widget._day.day,
-      widget._day.month,
-      birthday,
-    );
+    _box.put(getHashCode(date), tempList);
+    LocalNotifications.scheduleNotification(date.day, date.month, birthday);
     Navigator.pop(context);
   }
 

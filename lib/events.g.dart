@@ -21,13 +21,14 @@ class BirthdayAdapter extends TypeAdapter<Event> {
       fields[2] as String,
       fields[3] as String,
       fields[0] as int,
+      fields[4] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, Event obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -35,7 +36,9 @@ class BirthdayAdapter extends TypeAdapter<Event> {
       ..writeByte(2)
       ..write(obj.phone)
       ..writeByte(3)
-      ..write(obj.wishes);
+      ..write(obj.wishes)
+      ..writeByte(4)
+      ..write(obj.year);
   }
 
   @override

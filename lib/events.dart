@@ -17,15 +17,18 @@ class Event extends HiveObject {
   final String phone;
   @HiveField(3)
   String wishes;
+  @HiveField(4)
+  int year;
   Event(
     this.name, [
     this.phone = 'No number',
     this.wishes = 'No wishes',
     this.id = 0,
+    this.year = 0,
   ]);
 
   @override
-  String toString() => name;
+  String toString() => 'name: $name year: $year';
 }
 
 final kEvents = LinkedHashMap<DateTime, List<Event>>(
@@ -36,8 +39,14 @@ int getHashCode(DateTime key) {
   return key.day * 100 + key.month;
 }
 
+int getIndexFromId(DateTime? day, int id) {
+  if (day == null) return -1;
+  if (kEvents[day] == null) return -1;
+  return kEvents[day]!.indexWhere((event) => event.id == id);
+}
+
 DateTime getDateTimeFromHashCode(int key) {
-  return DateTime(2025, key % 100, (key / 100).truncate());
+  return DateTime(0, key % 100, (key / 100).truncate());
 }
 
 bool isSameDayAndMonth(DateTime? a, DateTime? b) {

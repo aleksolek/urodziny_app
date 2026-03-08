@@ -74,11 +74,16 @@ class LocalNotifications {
     print(
       "Scheduling notification for the day: $day month: $month id: ${event.id}",
     );
-    int year = DateTime.now().year;
-    // Prevent scheduling in the past
-    if (month <= DateTime.now().month) {
-      if (day <= DateTime.now().day) {
-        year++;
+    int yearsNumber = 1;
+    int year = event.year;
+    if (year == 0) {
+      yearsNumber = NUMBER_OF_YEARS;
+      year = DateTime.now().year;
+      // Prevent scheduling in the past
+      if (month <= DateTime.now().month) {
+        if (day <= DateTime.now().day) {
+          year++;
+        }
       }
     }
     String fixedPhone = event.phone.replaceAll(RegExp(r'\D'), '');
@@ -88,7 +93,7 @@ class LocalNotifications {
       'phone': fixedPhone,
       'wishes': event.wishes,
     });
-    for (var i = 0; i < NUMBER_OF_YEARS; i++) {
+    for (var i = 0; i < yearsNumber; i++) {
       await flutterLocalNotificationsPlugin.zonedSchedule(
         id: event.id + i,
         // id: event.id,

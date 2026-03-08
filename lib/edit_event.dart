@@ -5,8 +5,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 class EditEvent extends StatefulWidget {
   final DateTime _day;
-  final int _index;
-  EditEvent(this._day, this._index);
+  final int _id;
+  EditEvent(this._day, this._id);
   State<EditEvent> createState() => _EditEvent();
 }
 
@@ -15,11 +15,14 @@ class _EditEvent extends State<EditEvent> {
   bool isEditActive = false;
   late TextEditingController wishesController;
   Event? currentEvent;
+  int index = -1;
   @override
   void initState() {
     super.initState();
 
-    currentEvent = kEvents[widget._day]?[widget._index];
+    index = getIndexFromId(widget._day, widget._id);
+    assert(index != -1);
+    currentEvent = kEvents[widget._day]?[index];
     wishesController = TextEditingController(text: currentEvent?.wishes);
   }
 
@@ -50,9 +53,9 @@ class _EditEvent extends State<EditEvent> {
     setState(() {
       // When we press save:
       if (isEditActive) {
-        kEvents[widget._day]?[widget._index].wishes = wishesController.text;
+        kEvents[widget._day]?[index].wishes = wishesController.text;
         _box.put(getHashCode(widget._day), kEvents[widget._day]);
-        currentEvent = kEvents[widget._day]?[widget._index];
+        currentEvent = kEvents[widget._day]?[index];
       }
       isEditActive = !isEditActive;
     });

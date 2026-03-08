@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
         case EditEventRoute:
           final Map<String, dynamic> args =
               settings.arguments as Map<String, dynamic>;
-          screen = EditEvent(args["day"], args["index"]);
+          screen = EditEvent(args["day"], args["id"]);
           break;
         default:
           return null;

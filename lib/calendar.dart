@@ -45,11 +45,12 @@ class _Calendar extends State<Calendar> {
     }
   }
 
-  void _deleteEvent(int index) {
+  void _deleteEvent(int id) {
+    final int index = getIndexFromId(_selectedDay, id);
+    if (index == -1) return;
     print("Deleting event index: $index for day $_selectedDay");
     print("${kEvents[_selectedDay]?[index]}");
-    int eventId = kEvents[_selectedDay]![index].id;
-    LocalNotifications.deleteScheduledNotification(eventId);
+    LocalNotifications.deleteScheduledNotification(id);
     kEvents[_selectedDay]?.removeAt(index);
     _box.put(getHashCode(_selectedDay as DateTime), kEvents[_selectedDay]);
     setState(() {
@@ -58,8 +59,17 @@ class _Calendar extends State<Calendar> {
   }
 
   List<Event> _getEventsForDay(DateTime day) {
-    // Implementation example
-    return kEvents[day] ?? [];
+    List<Event>? tempList = kEvents[day];
+    if (tempList == null) {
+      return [];
+    }
+    List<Event> resultList = [];
+    for (Event event in tempList) {
+      if (event.year == 0 || event.year == day.year) {
+        resultList.add(event);
+      }
+    }
+    return resultList;
   }
 
   @override
@@ -107,7 +117,7 @@ class _Calendar extends State<Calendar> {
                     return ListTile(
                       trailing: IconButton(
                         onPressed: () {
-                          _deleteEvent(index);
+                          _deleteEvent(_selectedEvents.value[index].id);
                         },
                         icon: Icon(Icons.delete),
                         color: Colors.blue,
@@ -135,7 +145,7 @@ class _Calendar extends State<Calendar> {
     Navigator.pushNamed(
       context,
       EditEventRoute,
-      arguments: {"day": _selectedDay, "index": index},
+      arguments: {"day": _selectedDay, "id": _selectedEvents.value[index].id},
     );
   }
 }
