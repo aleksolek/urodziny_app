@@ -12,7 +12,6 @@ void main() async {
 
   // open the box
   var box = await Hive.openBox('birthdayEvents');
-  // Hive.deleteBoxFromDisk('birthdayEvents');
   for (int key in box.keys) {
     DateTime keyDateTime = getDateTimeFromHashCode(key);
     final dynamicEvents = box.get(key) as List<dynamic>?;

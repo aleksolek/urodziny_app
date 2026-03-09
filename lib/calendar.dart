@@ -4,6 +4,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:urodziny_app/app.dart';
 import 'package:urodziny_app/events.dart';
 import 'package:urodziny_app/local_notifications.dart';
+import 'package:urodziny_app/backup.dart';
 
 class Calendar extends StatefulWidget {
   const Calendar({super.key});
@@ -131,6 +132,19 @@ class _Calendar extends State<Calendar> {
                 ),
               );
             },
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: () => Backup.createBackup(),
+                child: Text('Eksportuj kalendarz'),
+              ),
+              ElevatedButton(
+                onPressed: () => Backup.importBackup(context),
+                child: Text('Importuj kalendarz'),
+              ),
+            ],
           ),
         ],
       ),

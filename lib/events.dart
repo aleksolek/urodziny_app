@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:convert';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -26,6 +27,23 @@ class Event extends HiveObject {
     this.id = 0,
     this.year = 0,
   ]);
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'phone': phone,
+    'wishes': wishes,
+    'year': year,
+  };
+  factory Event.fromJson(Map<String, dynamic> json) {
+    return Event(
+      json['name'],
+      json['phone'],
+      json['wishes'],
+      json['id'],
+      json['year'],
+    );
+  }
 
   @override
   String toString() => 'name: $name year: $year';
