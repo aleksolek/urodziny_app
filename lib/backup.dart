@@ -54,9 +54,9 @@ class Backup {
         List<Event> list = List<Event>.from(
           value.map((data) => Event.fromJson(data)).toList(),
         );
-
-        box.put(key, list);
-        DateTime keyDateTime = getDateTimeFromHashCode(int.parse(key));
+        int keyInt = int.parse(key);
+        box.put(keyInt, list);
+        DateTime keyDateTime = getDateTimeFromHashCode(keyInt);
         kEvents[keyDateTime] = list;
       });
       ScaffoldMessenger.of(context).showSnackBar(
