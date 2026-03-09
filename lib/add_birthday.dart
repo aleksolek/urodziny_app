@@ -15,6 +15,7 @@ class _AddBirthdayState extends State<AddBirthday> {
   final _box = Hive.box('birthdayEvents');
   Map<String, String> receivedContact = {"name": '', "phone": ''};
   bool isOneTimeEvent = false;
+  bool withoutMessage = false;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +44,19 @@ class _AddBirthdayState extends State<AddBirthday> {
                     },
                   ),
                   Text('Jednorazowe wydarzenie'),
+                ],
+              ),
+              Row(
+                children: [
+                  Checkbox(
+                    value: withoutMessage,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        withoutMessage = value!;
+                      });
+                    },
+                  ),
+                  Text('Nie wysyłaj wiadomości'),
                 ],
               ),
               TextField(
@@ -96,7 +110,12 @@ class _AddBirthdayState extends State<AddBirthday> {
     List<Event> tempList = kEvents[date] as List<Event>;
     print(tempList);
     _box.put(getHashCode(date), tempList);
-    LocalNotifications.scheduleNotification(date.day, date.month, birthday);
+    LocalNotifications.scheduleNotification(
+      date.day,
+      date.month,
+      birthday,
+      withoutMessage,
+    );
     Navigator.pop(context);
   }
 

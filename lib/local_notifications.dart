@@ -55,7 +55,12 @@ class LocalNotifications {
     );
   }
 
-  static Future scheduleNotification(int day, int month, Event event) async {
+  static Future scheduleNotification(
+    int day,
+    int month,
+    Event event,
+    bool withoutMessage,
+  ) async {
     const AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
           "scheduled",
@@ -92,15 +97,16 @@ class LocalNotifications {
     String fullPayload = jsonEncode({
       'phone': fixedPhone,
       'wishes': event.wishes,
+      'messageDisabled': withoutMessage,
     });
-    for (var i = 0; i < yearsNumber; i++) {
+    for (var i = 0; i < 1; i++) {
       await flutterLocalNotificationsPlugin.zonedSchedule(
         id: event.id + i,
         // id: event.id,
-        scheduledDate: tz.TZDateTime.local(year + i, month, day, 10),
-        // scheduledDate: tz.TZDateTime.now(
-        //   tz.local,
-        // ).add(const Duration(seconds: 3)),
+        // scheduledDate: tz.TZDateTime.local(year + i, month, day, 10),
+        scheduledDate: tz.TZDateTime.now(
+          tz.local,
+        ).add(const Duration(seconds: 3)),
         notificationDetails: notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         title: 'Urodziny ${event.name}!',
@@ -121,19 +127,21 @@ class LocalNotifications {
   ) async {
     print("Notyfikacja kliknieta");
     var payloadData = jsonDecode(notificationResponse.payload as String);
-    print("Po zdekodowaniu: ${payloadData["wishes"]}");
-    final Uri toLaunch = Uri(
-      scheme: 'https',
-      host: 'wa.me',
-      path: payloadData["phone"],
-      queryParameters: {"text": payloadData["wishes"]},
-    );
-    // Url.LaunchInBrowser(toLaunch);
-    print("Launching");
-    if (!await launchUrl(toLaunch, mode: LaunchMode.externalApplication)) {
-      throw Exception('Could not launch $toLaunch');
+    if (payloadData["messageDisabled"] == false) {
+      print("Po zdekodowaniu: ${payloadData["wishes"]}");
+      final Uri toLaunch = Uri(
+        scheme: 'https',
+        host: 'wa.me',
+        path: payloadData["phone"],
+        queryParameters: {"text": payloadData["wishes"]},
+      );
+      // Url.LaunchInBrowser(toLaunch);
+      print("Launching");
+      if (!await launchUrl(toLaunch, mode: LaunchMode.externalApplication)) {
+        throw Exception('Could not launch $toLaunch');
+      }
+      print("Launched");
     }
-    print("Launched");
   }
 
   static String strip(String str, String charactersToRemove) {

@@ -116,6 +116,9 @@ class _Calendar extends State<Calendar> {
                   itemCount: value.length,
                   itemBuilder: (BuildContext context, int index) {
                     return ListTile(
+                      leading: value[index].year == 0
+                          ? const Icon(Icons.wallet_giftcard)
+                          : const Icon(Icons.expand_circle_down_outlined),
                       trailing: IconButton(
                         onPressed: () {
                           _deleteEvent(_selectedEvents.value[index].id);
@@ -124,7 +127,7 @@ class _Calendar extends State<Calendar> {
                         color: Colors.blue,
                       ),
                       title: Text(
-                        "${value[index]}",
+                        "${value[index].name}",
                       ), // Main title text that shows item index.
                       onTap: () => _onEditEventTap(context, index),
                     );
