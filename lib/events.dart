@@ -13,20 +13,29 @@ class Event extends HiveObject {
   @HiveField(0)
   int id;
   @HiveField(1)
-  final String name;
+  String name;
   @HiveField(2)
-  final String phone;
+  String phone;
   @HiveField(3)
   String wishes;
   @HiveField(4)
   int year;
+  @HiveField(5)
+  String eventName;
+  @HiveField(6)
+  bool messageDisabled;
+  @HiveField(7)
+  DateTime reminder;
   Event(
-    this.name, [
-    this.phone = 'No number',
-    this.wishes = 'No wishes',
-    this.id = 0,
-    this.year = 0,
-  ]);
+    this.name,
+    this.phone,
+    this.wishes,
+    this.id,
+    this.year,
+    this.eventName,
+    this.messageDisabled,
+    this.reminder,
+  );
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -34,6 +43,9 @@ class Event extends HiveObject {
     'phone': phone,
     'wishes': wishes,
     'year': year,
+    'eventName': eventName,
+    'messageDisabled': messageDisabled,
+    'reminder': reminder,
   };
   factory Event.fromJson(Map<String, dynamic> json) {
     return Event(
@@ -42,6 +54,9 @@ class Event extends HiveObject {
       json['wishes'],
       json['id'],
       json['year'],
+      json['eventName'],
+      json['messageDisabled'],
+      json['reminder'],
     );
   }
 

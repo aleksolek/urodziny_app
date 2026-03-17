@@ -16,23 +16,64 @@ class _AddBirthdayState extends State<AddBirthday> {
   Map<String, String> receivedContact = {"name": '', "phone": ''};
   bool isOneTimeEvent = false;
   bool withoutMessage = false;
+  final nameController = TextEditingController();
+  final phoneController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final wishesController = TextEditingController();
+    final eventNameController = TextEditingController();
     return Scaffold(
-      appBar: AppBar(title: Text('Dodaj urodziny')),
+      appBar: AppBar(title: Text('Dodaj wydarzenie')),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Data urodzin: ${widget._day.day}/${widget._day.month}/${widget._day.year}',
+            'Data: ${widget._day.day}/${widget._day.month}/${widget._day.year}',
           ),
-          Text('Imie: ${receivedContact["name"]}'),
-          Text('Telefon: ${receivedContact["phone"]}'),
           Column(
             children: [
+              TextField(
+                controller: nameController,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  hintText: "Imię",
+                  hintStyle: TextStyle(color: Colors.grey),
+                  labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+                  labelText: "Imię",
+                ),
+              ),
+              TextField(
+                controller: phoneController,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  hintText: "Telefon",
+                  labelText: "Telefon",
+                  labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+                  hintStyle: TextStyle(color: Colors.grey),
+                ),
+              ),
+              TextField(
+                controller: wishesController,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  hintText: "Wpisz życzenia",
+                  labelText: "Życzenia",
+                  labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+                  hintStyle: TextStyle(color: Colors.grey),
+                ),
+              ),
+              TextField(
+                controller: eventNameController,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  hintText: "Wpisz nazwę wydarzenia (opcjonalne)",
+                  labelText: "Nazwa wydarzenia",
+                  labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+                  hintStyle: TextStyle(color: Colors.grey),
+                ),
+              ),
               Row(
                 children: [
                   Checkbox(
@@ -59,23 +100,16 @@ class _AddBirthdayState extends State<AddBirthday> {
                   Text('Nie wysyłaj wiadomości'),
                 ],
               ),
-              TextField(
-                controller: wishesController,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  hintText: "Wpisz zyczenia",
-                  hintStyle: TextStyle(color: Colors.grey),
-                ),
-              ),
               ElevatedButton(
                 onPressed: () => _onChoosePersonPress(context),
                 child: Text('Wybierz z kontaktow'),
               ),
               ElevatedButton(
                 onPressed: () => _onSavePress(
-                  receivedContact["name"] as String,
-                  receivedContact["phone"] as String,
+                  nameController.text,
+                  phoneController.text,
                   wishesController.text,
+                  eventNameController.text,
                 ),
                 child: Text('Zapisz'),
               ),
@@ -88,14 +122,45 @@ class _AddBirthdayState extends State<AddBirthday> {
 
   Widget okButton = TextButton(child: Text("OK"), onPressed: () {});
 
-  _onSavePress(String name, String phone, String wishes) {
+  _onSavePress(String name, String phone, String wishes, String eventName) {
+    if (name == "" && eventName == "") {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text("Puste pola"),
+          content: Text("Podaj imię, albo nazwę wydarzenia"),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      );
+      return;
+    }
     DateTime date = widget._day;
+    int year = 0;
     Event birthday;
     if (isOneTimeEvent) {
-      birthday = Event(name, phone, wishes, 0, date.year);
-    } else {
-      birthday = Event(name, phone, wishes);
+      year = date.year;
     }
+    birthday = Event(
+      name,
+      phone,
+      wishes,
+      0,
+      year,
+      eventName,
+      withoutMessage,
+      DateTime(0),
+    );
+
     if (kEvents[date] == null) {
       birthday.id = 1;
       print('Lista na ten dzien nie istnieje jeszcze');
@@ -110,12 +175,7 @@ class _AddBirthdayState extends State<AddBirthday> {
     List<Event> tempList = kEvents[date] as List<Event>;
     print(tempList);
     _box.put(getHashCode(date), tempList);
-    LocalNotifications.scheduleNotification(
-      date.day,
-      date.month,
-      birthday,
-      withoutMessage,
-    );
+    LocalNotifications.scheduleNotification(date.day, date.month, birthday);
     Navigator.pop(context);
   }
 
@@ -124,6 +184,8 @@ class _AddBirthdayState extends State<AddBirthday> {
     if (result != null) {
       setState(() {
         receivedContact = result as Map<String, String>;
+        nameController.text = receivedContact["name"]!;
+        phoneController.text = receivedContact["phone"]!;
       });
     }
   }

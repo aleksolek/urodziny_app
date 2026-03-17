@@ -46,7 +46,40 @@ class _Calendar extends State<Calendar> {
     }
   }
 
-  void _deleteEvent(int id) {
+  void _deleteEvent(int id) async {
+    bool delete = true;
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Na pewno?"),
+        content: Text("Czy na pewno chcesz usunąć to wydarzenie?"),
+        actions: <Widget>[
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text('JEDNAK NIE'),
+            onPressed: () {
+              delete = false;
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text('TAK USUŃ'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
+    print("Delete: $delete");
+    if (delete == false) {
+      return;
+    }
     final int index = getIndexFromId(_selectedDay, id);
     if (index == -1) return;
     print("Deleting event index: $index for day $_selectedDay");
@@ -116,8 +149,10 @@ class _Calendar extends State<Calendar> {
                   itemCount: value.length,
                   itemBuilder: (BuildContext context, int index) {
                     return ListTile(
-                      leading: value[index].year == 0
+                      leading: value[index].eventName == ''
                           ? const Icon(Icons.wallet_giftcard)
+                          : value[index].year == 0
+                          ? const Icon(Icons.event_repeat)
                           : const Icon(Icons.expand_circle_down_outlined),
                       trailing: IconButton(
                         onPressed: () {
@@ -127,7 +162,9 @@ class _Calendar extends State<Calendar> {
                         color: Colors.blue,
                       ),
                       title: Text(
-                        "${value[index].name}",
+                        value[index].eventName == ''
+                            ? "${value[index].name}"
+                            : "${value[index].eventName}",
                       ), // Main title text that shows item index.
                       onTap: () => _onEditEventTap(context, index),
                     );

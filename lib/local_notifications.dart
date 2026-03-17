@@ -55,12 +55,7 @@ class LocalNotifications {
     );
   }
 
-  static Future scheduleNotification(
-    int day,
-    int month,
-    Event event,
-    bool withoutMessage,
-  ) async {
+  static Future scheduleNotification(int day, int month, Event event) async {
     const AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
           "scheduled",
@@ -97,8 +92,11 @@ class LocalNotifications {
     String fullPayload = jsonEncode({
       'phone': fixedPhone,
       'wishes': event.wishes,
-      'messageDisabled': withoutMessage,
+      'messageDisabled': event.messageDisabled,
     });
+    String notificationTitle = event.eventName == ''
+        ? 'Urodziny ${event.name}!'
+        : event.eventName;
     for (var i = 0; i < 1; i++) {
       await flutterLocalNotificationsPlugin.zonedSchedule(
         id: event.id + i,
@@ -109,8 +107,8 @@ class LocalNotifications {
         ).add(const Duration(seconds: 3)),
         notificationDetails: notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        title: 'Urodziny ${event.name}!',
-        body: 'Nie zapomnij zlozyc zyczen',
+        title: notificationTitle,
+        body: 'Nie zapomnij czegoś napisać!',
         payload: fullPayload,
       );
     }

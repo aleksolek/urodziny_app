@@ -13,6 +13,9 @@ class EditEvent extends StatefulWidget {
 class _EditEvent extends State<EditEvent> {
   final _box = Hive.box('birthdayEvents');
   bool isEditActive = false;
+  late TextEditingController nameController;
+  late TextEditingController phoneController;
+  late TextEditingController eventNameController;
   late TextEditingController wishesController;
   Event? currentEvent;
   int index = -1;
@@ -23,6 +26,9 @@ class _EditEvent extends State<EditEvent> {
     index = getIndexFromId(widget._day, widget._id);
     assert(index != -1);
     currentEvent = kEvents[widget._day]?[index];
+    nameController = TextEditingController(text: currentEvent?.name);
+    phoneController = TextEditingController(text: currentEvent?.phone);
+    eventNameController = TextEditingController(text: currentEvent?.eventName);
     wishesController = TextEditingController(text: currentEvent?.wishes);
   }
 
@@ -30,19 +36,62 @@ class _EditEvent extends State<EditEvent> {
   Widget build(BuildContext context) {
     if (currentEvent == null) return Text('Null event');
     return Scaffold(
-      appBar: AppBar(title: Text('Edytuj urodziny')),
+      appBar: AppBar(title: Text('Edytuj wydarzenie')),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Imie: ${currentEvent?.name}'),
-          Text('Numer: ${currentEvent?.phone}'),
           isEditActive
-              ? TextField(controller: wishesController, maxLines: null)
-              : Text('Zyczenia: ${currentEvent?.wishes}'),
+              ? TextField(
+                  controller: nameController,
+                  maxLines: null,
+                  decoration: const InputDecoration(
+                    hintText: "Imię",
+                    hintStyle: TextStyle(color: Colors.grey),
+                    labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+                    labelText: "Imię",
+                  ),
+                )
+              : Text('Imię: ${currentEvent?.name}'),
+          isEditActive
+              ? TextField(
+                  controller: phoneController,
+                  maxLines: null,
+                  decoration: const InputDecoration(
+                    hintText: "Telefon",
+                    hintStyle: TextStyle(color: Colors.grey),
+                    labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+                    labelText: "Telefon",
+                  ),
+                )
+              : Text('Telefon: ${currentEvent?.phone}'),
+          isEditActive
+              ? TextField(
+                  controller: eventNameController,
+                  maxLines: null,
+                  decoration: const InputDecoration(
+                    hintText: "Nazwa wydarzenia",
+                    hintStyle: TextStyle(color: Colors.grey),
+                    labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+                    labelText: "Nazwa wydarzenia",
+                  ),
+                )
+              : Text('Nazwa wydarzenia: ${currentEvent?.eventName}'),
+          isEditActive
+              ? TextField(
+                  controller: wishesController,
+                  maxLines: null,
+                  decoration: const InputDecoration(
+                    hintText: "Życzenia",
+                    hintStyle: TextStyle(color: Colors.grey),
+                    labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+                    labelText: "Życzenia",
+                  ),
+                )
+              : Text('Życzenia: ${currentEvent?.wishes}'),
           ElevatedButton(
             onPressed: () => _onEditPress(),
-            child: isEditActive ? Text('Zapisz') : Text('Edytuj zyczenia'),
+            child: isEditActive ? Text('Zapisz') : Text('Edytuj'),
           ),
         ],
       ),
@@ -53,6 +102,9 @@ class _EditEvent extends State<EditEvent> {
     setState(() {
       // When we press save:
       if (isEditActive) {
+        kEvents[widget._day]?[index].name = nameController.text;
+        kEvents[widget._day]?[index].phone = phoneController.text;
+        kEvents[widget._day]?[index].eventName = eventNameController.text;
         kEvents[widget._day]?[index].wishes = wishesController.text;
         _box.put(getHashCode(widget._day), kEvents[widget._day]);
         currentEvent = kEvents[widget._day]?[index];
