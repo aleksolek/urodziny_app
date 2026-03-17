@@ -32,88 +32,84 @@ class _AddBirthdayState extends State<AddBirthday> {
           Text(
             'Data: ${widget._day.day}/${widget._day.month}/${widget._day.year}',
           ),
-          Column(
+          TextField(
+            controller: nameController,
+            maxLines: null,
+            decoration: const InputDecoration(
+              hintText: "Imię",
+              hintStyle: TextStyle(color: Colors.grey),
+              labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+              labelText: "Imię",
+            ),
+          ),
+          TextField(
+            controller: phoneController,
+            maxLines: null,
+            decoration: const InputDecoration(
+              hintText: "Telefon",
+              labelText: "Telefon",
+              labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+              hintStyle: TextStyle(color: Colors.grey),
+            ),
+          ),
+          TextField(
+            controller: wishesController,
+            maxLines: null,
+            decoration: const InputDecoration(
+              hintText: "Wpisz życzenia",
+              labelText: "Życzenia",
+              labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+              hintStyle: TextStyle(color: Colors.grey),
+            ),
+          ),
+          TextField(
+            controller: eventNameController,
+            maxLines: null,
+            decoration: const InputDecoration(
+              hintText: "Wpisz nazwę wydarzenia (opcjonalne)",
+              labelText: "Nazwa wydarzenia",
+              labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+              hintStyle: TextStyle(color: Colors.grey),
+            ),
+          ),
+          Row(
             children: [
-              TextField(
-                controller: nameController,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  hintText: "Imię",
-                  hintStyle: TextStyle(color: Colors.grey),
-                  labelStyle: TextStyle(fontSize: 14, color: Colors.black),
-                  labelText: "Imię",
-                ),
+              Checkbox(
+                value: isOneTimeEvent,
+                onChanged: (bool? value) {
+                  setState(() {
+                    isOneTimeEvent = value!;
+                  });
+                },
               ),
-              TextField(
-                controller: phoneController,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  hintText: "Telefon",
-                  labelText: "Telefon",
-                  labelStyle: TextStyle(fontSize: 14, color: Colors.black),
-                  hintStyle: TextStyle(color: Colors.grey),
-                ),
-              ),
-              TextField(
-                controller: wishesController,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  hintText: "Wpisz życzenia",
-                  labelText: "Życzenia",
-                  labelStyle: TextStyle(fontSize: 14, color: Colors.black),
-                  hintStyle: TextStyle(color: Colors.grey),
-                ),
-              ),
-              TextField(
-                controller: eventNameController,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  hintText: "Wpisz nazwę wydarzenia (opcjonalne)",
-                  labelText: "Nazwa wydarzenia",
-                  labelStyle: TextStyle(fontSize: 14, color: Colors.black),
-                  hintStyle: TextStyle(color: Colors.grey),
-                ),
-              ),
-              Row(
-                children: [
-                  Checkbox(
-                    value: isOneTimeEvent,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        isOneTimeEvent = value!;
-                      });
-                    },
-                  ),
-                  Text('Jednorazowe wydarzenie'),
-                ],
-              ),
-              Row(
-                children: [
-                  Checkbox(
-                    value: withoutMessage,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        withoutMessage = value!;
-                      });
-                    },
-                  ),
-                  Text('Nie wysyłaj wiadomości'),
-                ],
-              ),
-              ElevatedButton(
-                onPressed: () => _onChoosePersonPress(context),
-                child: Text('Wybierz z kontaktow'),
-              ),
-              ElevatedButton(
-                onPressed: () => _onSavePress(
-                  nameController.text,
-                  phoneController.text,
-                  wishesController.text,
-                  eventNameController.text,
-                ),
-                child: Text('Zapisz'),
-              ),
+              Text('Jednorazowe wydarzenie'),
             ],
+          ),
+          Row(
+            children: [
+              Checkbox(
+                value: withoutMessage,
+                onChanged: (bool? value) {
+                  setState(() {
+                    withoutMessage = value!;
+                  });
+                },
+              ),
+              Text('Nie wysyłaj wiadomości'),
+            ],
+          ),
+          ElevatedButton(
+            onPressed: () => _onChoosePersonPress(context),
+            child: Text('Wybierz z kontaktow'),
+          ),
+          ElevatedButton(
+            onPressed: () => _onSavePress(
+              nameController.text,
+              phoneController.text,
+              wishesController.text,
+              eventNameController.text,
+            ),
+            child: Text('Zapisz'),
           ),
         ],
       ),
