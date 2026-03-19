@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:io';
+import 'package:urodziny_app/local_notifications.dart';
 
 class Backup {
   static final box = Hive.box('birthdayEvents');
@@ -59,6 +60,8 @@ class Backup {
         DateTime keyDateTime = getDateTimeFromHashCode(keyInt);
         kEvents[keyDateTime] = list;
       });
+      await LocalNotifications.deleteAllNotifications();
+      await LocalNotifications.scheduleAllNotifications();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Import zakonczony sukcesem')),
       );

@@ -24,7 +24,7 @@ class BirthdayAdapter extends TypeAdapter<Event> {
       fields[4] as int,
       fields[5] as String,
       fields[6] as bool,
-      fields[7] as DateTime,
+      fields[7] as int,
     );
   }
 

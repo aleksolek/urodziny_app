@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:urodziny_app/events.dart';
 import 'package:urodziny_app/app.dart';
@@ -18,11 +19,12 @@ class _AddBirthdayState extends State<AddBirthday> {
   bool withoutMessage = false;
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
+  final wishesController = TextEditingController();
+  final eventNameController = TextEditingController();
+  final reminderController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    final wishesController = TextEditingController();
-    final eventNameController = TextEditingController();
     return Scaffold(
       appBar: AppBar(title: Text('Dodaj wydarzenie')),
       body: Column(
@@ -72,6 +74,21 @@ class _AddBirthdayState extends State<AddBirthday> {
               hintStyle: TextStyle(color: Colors.grey),
             ),
           ),
+          TextField(
+            controller: reminderController,
+            maxLines: null,
+            keyboardType: TextInputType.number,
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly,
+            ],
+            decoration: const InputDecoration(
+              hintText:
+                  "Na ile dni wcześniej wysłać przypomnienie (opcjonalne)",
+              labelText: "Przypomnienie na tyle dni wcześniej",
+              labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+              hintStyle: TextStyle(color: Colors.grey),
+            ),
+          ),
           Row(
             children: [
               Checkbox(
@@ -108,6 +125,7 @@ class _AddBirthdayState extends State<AddBirthday> {
               phoneController.text,
               wishesController.text,
               eventNameController.text,
+              reminderController.text,
             ),
             child: Text('Zapisz'),
           ),
@@ -116,31 +134,55 @@ class _AddBirthdayState extends State<AddBirthday> {
     );
   }
 
-  Widget okButton = TextButton(child: Text("OK"), onPressed: () {});
-
-  _onSavePress(String name, String phone, String wishes, String eventName) {
-    if (name == "" && eventName == "") {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: Text("Puste pola"),
-          content: Text("Podaj imię, albo nazwę wydarzenia"),
-          actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+  void showWarning(
+    BuildContext context,
+    String warningTitle,
+    String warningText,
+  ) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(warningTitle),
+        content: Text(warningText),
+        actions: <Widget>[
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
             ),
-          ],
-        ),
-      );
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  _onSavePress(
+    String name,
+    String phone,
+    String wishes,
+    String eventName,
+    String reminder,
+  ) {
+    if (name == "" && eventName == "") {
+      showWarning(context, "Puste pola", "Podaj imię, albo nazwę wydarzenia");
       return;
     }
     DateTime date = widget._day;
+    int reminderInt = 0;
+    if (reminder != "") {
+      reminderInt = int.parse(reminder);
+      if (reminderInt > 364) {
+        showWarning(
+          context,
+          "Przypomnienie",
+          "Przypomnienie musi być krótsze niż rok",
+        );
+        return;
+      }
+    }
     int year = 0;
     Event birthday;
     if (isOneTimeEvent) {
@@ -150,21 +192,27 @@ class _AddBirthdayState extends State<AddBirthday> {
       name,
       phone,
       wishes,
-      0,
+      generateEventId(date),
       year,
       eventName,
       withoutMessage,
-      DateTime(0),
+      reminderInt,
     );
 
     if (kEvents[date] == null) {
-      birthday.id = 1;
       print('Lista na ten dzien nie istnieje jeszcze');
       final growableList = List<Event>.empty(growable: true);
       growableList.add(birthday);
       kEvents[date] = growableList;
     } else {
-      birthday.id = generateEventId(date);
+      if (kEvents[date]!.length == 99) {
+        showWarning(
+          context,
+          'Za dużo wydarzeń',
+          'Maksymalna liczba 99 wydarzeń zosatła przekroczona. Usuń jakieś wydarzenia aby móc dodawać kolejne',
+        );
+        return;
+      }
       kEvents[date]?.add(birthday);
       print(birthday);
     }
@@ -188,24 +236,21 @@ class _AddBirthdayState extends State<AddBirthday> {
 }
 
 int generateEventId(DateTime key) {
-  int eventId = 0;
   if (kEvents[key] == null) {
-    eventId = key.day * 1000000 + key.month * 10000 + 1 * 100;
-    return eventId;
+    return 0;
   }
-  int id = 1;
+  int eventId = 1;
   while (true) {
     bool idUsed = false;
     for (int j = 0; j < kEvents[key]!.length; j++) {
-      if (id == kEvents[key]![j].id) {
+      if (eventId == kEvents[key]![j].id) {
         idUsed = true;
         break;
       }
     }
     if (!idUsed) {
-      eventId = key.day * 1000000 + key.month * 10000 + id * 100;
       return eventId;
     }
-    id++;
+    eventId++;
   }
 }

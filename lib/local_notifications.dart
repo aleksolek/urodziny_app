@@ -33,62 +33,93 @@ class LocalNotifications {
     tz.setLocalLocation(tz.getLocation('Europe/Warsaw'));
   }
 
-  static Future sendSimpleNotification() async {
-    const AndroidNotificationDetails androidNotificationDetails =
-        AndroidNotificationDetails(
-          'your channel id',
-          'your channel name',
-          channelDescription: 'your channel description',
-          importance: Importance.max,
-          priority: Priority.high,
-          ticker: 'ticker',
-        );
-    const NotificationDetails notificationDetails = NotificationDetails(
-      android: androidNotificationDetails,
-    );
-    await flutterLocalNotificationsPlugin.show(
-      id: 0,
-      title: 'plain title',
-      body: 'plain body',
+  static const AndroidNotificationDetails androidNotificationDetails =
+      AndroidNotificationDetails(
+        "scheduled",
+        "scheduled notification",
+        channelDescription: "this is a scheduled notification",
+        importance: Importance.max,
+        priority: Priority.max,
+      );
+  static const DarwinNotificationDetails darwinNorificationDetails =
+      DarwinNotificationDetails();
+
+  static const NotificationDetails notificationDetails = NotificationDetails(
+    iOS: darwinNorificationDetails,
+    android: androidNotificationDetails,
+  );
+
+  // static Future sendSimpleNotification() async {
+  //   const AndroidNotificationDetails androidNotificationDetails =
+  //       AndroidNotificationDetails(
+  //         'your channel id',
+  //         'your channel name',
+  //         channelDescription: 'your channel description',
+  //         importance: Importance.max,
+  //         priority: Priority.high,
+  //         ticker: 'ticker',
+  //       );
+  //   const NotificationDetails notificationDetails = NotificationDetails(
+  //     android: androidNotificationDetails,
+  //   );
+  //   await flutterLocalNotificationsPlugin.show(
+  //     id: 0,
+  //     title: 'plain title',
+  //     body: 'plain body',
+  //     notificationDetails: notificationDetails,
+  //     payload: 'item x',
+  //   );
+  // }
+
+  static Future scheduleZonedNotification(
+    int day,
+    int month,
+    int year,
+    int notificationId,
+    String? notificationTitle,
+    String? notificationBody,
+    String? notificationPayload,
+  ) async {
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      id: notificationId,
+      scheduledDate: tz.TZDateTime.local(year, month, day, 10),
+      // scheduledDate: tz.TZDateTime.now(
+      //   tz.local,
+      // ).add(const Duration(seconds: 3)),
       notificationDetails: notificationDetails,
-      payload: 'item x',
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      title: notificationTitle,
+      body: notificationBody,
+      payload: notificationPayload,
     );
   }
 
   static Future scheduleNotification(int day, int month, Event event) async {
-    const AndroidNotificationDetails androidNotificationDetails =
-        AndroidNotificationDetails(
-          "scheduled",
-          "scheduled notification",
-          channelDescription: "this is a scheduled notification",
-          importance: Importance.max,
-          priority: Priority.max,
-        );
-    const DarwinNotificationDetails darwinNorificationDetails =
-        DarwinNotificationDetails();
-
-    const NotificationDetails notificationDetails = NotificationDetails(
-      iOS: darwinNorificationDetails,
-      android: androidNotificationDetails,
-    );
     print(
       "Scheduling notification for the day: $day month: $month id: ${event.id}",
     );
     int yearsNumber = 1;
     int year = event.year;
     if (year == 0) {
+      // It is a yearly recurring event
       yearsNumber = NUMBER_OF_YEARS;
       year = DateTime.now().year;
       // Prevent scheduling in the past
-      if (month <= DateTime.now().month) {
-        if (day <= DateTime.now().day) {
-          year++;
-        }
+      if (DateTime.now().isAfter(DateTime(year, month, day))) {
+        year++;
+      }
+    } else {
+      // If it was just one time event scheduled in the past than return
+      if (DateTime.now().isAfter(DateTime(year, month, day))) {
+        return;
       }
     }
+    DateTime reminderDate = DateTime(
+      year,
+      month,
+      day,
+    ).subtract(Duration(days: event.reminder));
     String fixedPhone = event.phone.replaceAll(RegExp(r'\D'), '');
-    print("To nasz nowy phone: $fixedPhone");
-    print("I zyczenia: ${event.wishes}");
     String fullPayload = jsonEncode({
       'phone': fixedPhone,
       'wishes': event.wishes,
@@ -97,26 +128,58 @@ class LocalNotifications {
     String notificationTitle = event.eventName == ''
         ? 'Urodziny ${event.name}!'
         : event.eventName;
-    for (var i = 0; i < 1; i++) {
-      await flutterLocalNotificationsPlugin.zonedSchedule(
-        id: event.id + i,
-        // id: event.id,
-        // scheduledDate: tz.TZDateTime.local(year + i, month, day, 10),
-        scheduledDate: tz.TZDateTime.now(
-          tz.local,
-        ).add(const Duration(seconds: 3)),
-        notificationDetails: notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        title: notificationTitle,
-        body: 'Nie zapomnij czegoś napisać!',
-        payload: fullPayload,
+    for (var i = 0; i < yearsNumber; i++) {
+      // Main notification
+      scheduleZonedNotification(
+        day,
+        month,
+        year + i,
+        event.id + i,
+        notificationTitle,
+        'Nie zapomnij czegoś napisać!',
+        fullPayload,
       );
+      // Reminder
+      if (DateTime.now().isAfter(reminderDate)) {
+        scheduleZonedNotification(
+          reminderDate.day,
+          reminderDate.month,
+          reminderDate.year + i,
+          event.id + i,
+          notificationTitle,
+          'Przygotuj się! To już niedługo: $day/$month',
+          '',
+        );
+      }
     }
   }
 
-  static Future deleteScheduledNotification(int eventId) async {
-    for (var i = 0; i < NUMBER_OF_YEARS; i++) {
-      await flutterLocalNotificationsPlugin.cancel(id: eventId + i);
+  static Future deleteScheduledNotification(
+    int day,
+    int month,
+    Event event,
+  ) async {
+    int baseId = getNotificationId(day, month, event.id);
+    int reminderId = baseId + 100;
+    int yearsNumber = 1;
+    if (event.year == 0) {
+      yearsNumber = NUMBER_OF_YEARS;
+    }
+    for (var i = 0; i < yearsNumber; i++) {
+      await flutterLocalNotificationsPlugin.cancel(id: baseId + i);
+      await flutterLocalNotificationsPlugin.cancel(id: reminderId + i);
+    }
+  }
+
+  static Future deleteAllNotifications() async {
+    await flutterLocalNotificationsPlugin.cancelAll();
+  }
+
+  static Future scheduleAllNotifications() async {
+    for (DateTime key in kEvents.keys) {
+      for (Event event in kEvents[key]!) {
+        scheduleNotification(key.day, key.month, event);
+      }
     }
   }
 
@@ -124,6 +187,10 @@ class LocalNotifications {
     NotificationResponse notificationResponse,
   ) async {
     print("Notyfikacja kliknieta");
+    if (notificationResponse.payload == null ||
+        notificationResponse.payload == "") {
+      return;
+    }
     var payloadData = jsonDecode(notificationResponse.payload as String);
     if (payloadData["messageDisabled"] == false) {
       print("Po zdekodowaniu: ${payloadData["wishes"]}");
@@ -149,5 +216,9 @@ class LocalNotifications {
     );
     String newStr = str.replaceAll(regex, '').trim();
     return newStr;
+  }
+
+  static int getNotificationId(int day, int month, int eventId) {
+    return day * 10000000 + month * 100000 + eventId * 1000;
   }
 }

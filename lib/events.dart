@@ -1,7 +1,6 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 import 'package:hive/hive.dart';
 
@@ -25,7 +24,7 @@ class Event extends HiveObject {
   @HiveField(6)
   bool messageDisabled;
   @HiveField(7)
-  DateTime reminder;
+  int reminder;
   Event(
     this.name,
     this.phone,
