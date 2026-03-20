@@ -46,6 +46,22 @@ class _Calendar extends State<Calendar> {
     }
   }
 
+  bool isDayAHoliday(DateTime day) {
+    if (isSameDayAndMonth(day, DateTime(0, 1, 1)) ||
+        isSameDayAndMonth(day, DateTime(0, 1, 6)) ||
+        isSameDayAndMonth(day, DateTime(0, 5, 1)) ||
+        isSameDayAndMonth(day, DateTime(0, 5, 3)) ||
+        isSameDayAndMonth(day, DateTime(0, 8, 15)) ||
+        isSameDayAndMonth(day, DateTime(0, 11, 1)) ||
+        isSameDayAndMonth(day, DateTime(0, 11, 11)) ||
+        isSameDayAndMonth(day, DateTime(0, 12, 24)) ||
+        isSameDayAndMonth(day, DateTime(0, 12, 25)) ||
+        isSameDayAndMonth(day, DateTime(0, 12, 26))) {
+      return true;
+    }
+    return false;
+  }
+
   void _deleteEvent(int id) async {
     bool delete = true;
     await showDialog(
@@ -113,10 +129,70 @@ class _Calendar extends State<Calendar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Kalendarz urodzin')),
+      appBar: AppBar(title: Text('Kalendarz wydarzeń')),
+      resizeToAvoidBottomInset: false,
       body: Column(
         children: [
           TableCalendar(
+            availableGestures: AvailableGestures.none,
+            daysOfWeekHeight: 20,
+            holidayPredicate: isDayAHoliday,
+            startingDayOfWeek: StartingDayOfWeek.monday,
+
+            daysOfWeekStyle: DaysOfWeekStyle(
+              weekdayStyle: TextStyle(fontWeight: FontWeight.w400),
+            ),
+            calendarBuilders: CalendarBuilders(
+              dowBuilder: (context, day) {
+                if (day.weekday == DateTime.saturday) {
+                  return Center(
+                    child: Text(
+                      'sob',
+                      style: TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  );
+                } else if (day.weekday == DateTime.sunday) {
+                  return Center(
+                    child: Text(
+                      'ndz',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  );
+                } else {
+                  return null;
+                }
+              },
+              holidayBuilder: (context, date, _) {
+                TextStyle style;
+                style = TextStyle().copyWith(color: Colors.red);
+                return Center(child: Text('${date.day}', style: style));
+              },
+              defaultBuilder: (context, date, _) {
+                TextStyle style;
+                if (date.weekday == 6) {
+                  // Saturday
+                  style = TextStyle().copyWith(color: Colors.blue);
+                  return Center(child: Text('${date.day}', style: style));
+                } else if (date.weekday == 7) {
+                  // Sunday
+                  style = TextStyle().copyWith(color: Colors.red);
+                  return Center(child: Text('${date.day}', style: style));
+                }
+                return null;
+              },
+            ),
+            locale: 'pl_PL',
+            headerStyle: HeaderStyle(
+              formatButtonVisible: false,
+              titleCentered: true,
+              titleTextStyle: TextStyle(fontWeight: FontWeight.w400),
+            ),
             focusedDay: _focusedDay,
             firstDay: DateTime.utc(2010, 10, 16),
             lastDay: DateTime.utc(2030, 3, 14),
@@ -139,15 +215,12 @@ class _Calendar extends State<Calendar> {
           ),
           ElevatedButton(
             onPressed: () => _onAddBirthdayTap(context),
-            child: Text('Dodaj urodziny'),
+            child: Text('Dodaj wydarzenie'),
           ),
           ValueListenableBuilder<List<Event>>(
             valueListenable: _selectedEvents,
             builder: (context, value, _) {
-              return Container(
-                margin: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                height: 205.0,
-                width: 333.0,
+              return Expanded(
                 child: ListView.builder(
                   scrollDirection: Axis.vertical,
                   itemCount: value.length,
@@ -163,7 +236,7 @@ class _Calendar extends State<Calendar> {
                           _deleteEvent(_selectedEvents.value[index].id);
                         },
                         icon: Icon(Icons.delete),
-                        color: Colors.blue,
+                        color: Colors.deepPurple,
                       ),
                       title: Text(
                         value[index].eventName == ''
@@ -196,7 +269,15 @@ class _Calendar extends State<Calendar> {
   }
 
   _onAddBirthdayTap(BuildContext context) {
-    Navigator.pushNamed(context, AddBirthdayRoute, arguments: _selectedDay);
+    Navigator.pushNamed(
+      context,
+      AddBirthdayRoute,
+      arguments: _selectedDay,
+    ).then(
+      (_) => setState(() {
+        _selectedEvents.value = _getEventsForDay(_selectedDay!);
+      }),
+    );
   }
 
   _onEditEventTap(BuildContext context, int index) {

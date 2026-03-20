@@ -27,109 +27,115 @@ class _AddBirthdayState extends State<AddBirthday> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Dodaj wydarzenie')),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Data: ${widget._day.day}/${widget._day.month}/${widget._day.year}',
-          ),
-          TextField(
-            controller: nameController,
-            maxLines: null,
-            decoration: const InputDecoration(
-              hintText: "Imię",
-              hintStyle: TextStyle(color: Colors.grey),
-              labelStyle: TextStyle(fontSize: 14, color: Colors.black),
-              labelText: "Imię",
-            ),
-          ),
-          TextField(
-            controller: phoneController,
-            maxLines: null,
-            decoration: const InputDecoration(
-              hintText: "Telefon",
-              labelText: "Telefon",
-              labelStyle: TextStyle(fontSize: 14, color: Colors.black),
-              hintStyle: TextStyle(color: Colors.grey),
-            ),
-          ),
-          TextField(
-            controller: wishesController,
-            maxLines: null,
-            decoration: const InputDecoration(
-              hintText: "Wpisz życzenia",
-              labelText: "Życzenia",
-              labelStyle: TextStyle(fontSize: 14, color: Colors.black),
-              hintStyle: TextStyle(color: Colors.grey),
-            ),
-          ),
-          TextField(
-            controller: eventNameController,
-            maxLines: null,
-            decoration: const InputDecoration(
-              hintText: "Wpisz nazwę wydarzenia (opcjonalne)",
-              labelText: "Nazwa wydarzenia",
-              labelStyle: TextStyle(fontSize: 14, color: Colors.black),
-              hintStyle: TextStyle(color: Colors.grey),
-            ),
-          ),
-          TextField(
-            controller: reminderController,
-            maxLines: null,
-            keyboardType: TextInputType.number,
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly,
-            ],
-            decoration: const InputDecoration(
-              hintText:
-                  "Na ile dni wcześniej wysłać przypomnienie (opcjonalne)",
-              labelText: "Przypomnienie na tyle dni wcześniej",
-              labelStyle: TextStyle(fontSize: 14, color: Colors.black),
-              hintStyle: TextStyle(color: Colors.grey),
-            ),
-          ),
-          Row(
+      body: SingleChildScrollView(
+        physics: AlwaysScrollableScrollPhysics(),
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Checkbox(
-                value: isOneTimeEvent,
-                onChanged: (bool? value) {
-                  setState(() {
-                    isOneTimeEvent = value!;
-                  });
-                },
+              Text(
+                'Data: ${widget._day.day}/${widget._day.month}/${widget._day.year}',
               ),
-              Text('Jednorazowe wydarzenie'),
+              TextField(
+                controller: nameController,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  hintText: "Imię",
+                  hintStyle: TextStyle(color: Colors.grey),
+                  labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+                  labelText: "Imię",
+                ),
+              ),
+              TextField(
+                controller: phoneController,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  hintText: "Telefon",
+                  labelText: "Telefon",
+                  labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+                  hintStyle: TextStyle(color: Colors.grey),
+                ),
+              ),
+              TextField(
+                controller: wishesController,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  hintText: "Wpisz życzenia",
+                  labelText: "Życzenia",
+                  labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+                  hintStyle: TextStyle(color: Colors.grey),
+                ),
+              ),
+              TextField(
+                controller: eventNameController,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  hintText: "Wpisz nazwę wydarzenia (opcjonalne)",
+                  labelText: "Nazwa wydarzenia",
+                  labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+                  hintStyle: TextStyle(color: Colors.grey),
+                ),
+              ),
+              TextField(
+                controller: reminderController,
+                maxLines: null,
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
+                decoration: const InputDecoration(
+                  hintText:
+                      "Na ile dni wcześniej wysłać przypomnienie (opcjonalne)",
+                  labelText: "Przypomnienie na tyle dni wcześniej",
+                  labelStyle: TextStyle(fontSize: 14, color: Colors.black),
+                  hintStyle: TextStyle(color: Colors.grey),
+                ),
+              ),
+              Row(
+                children: [
+                  Checkbox(
+                    value: isOneTimeEvent,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        isOneTimeEvent = value!;
+                      });
+                    },
+                  ),
+                  Text('Jednorazowe wydarzenie'),
+                ],
+              ),
+              Row(
+                children: [
+                  Checkbox(
+                    value: withoutMessage,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        withoutMessage = value!;
+                      });
+                    },
+                  ),
+                  Text('Nie wysyłaj wiadomości'),
+                ],
+              ),
+              ElevatedButton(
+                onPressed: () => _onChoosePersonPress(context),
+                child: Text('Wybierz z kontaktow'),
+              ),
+              ElevatedButton(
+                onPressed: () => _onSavePress(
+                  nameController.text,
+                  phoneController.text,
+                  wishesController.text,
+                  eventNameController.text,
+                  reminderController.text,
+                ),
+                child: Text('Zapisz'),
+              ),
             ],
           ),
-          Row(
-            children: [
-              Checkbox(
-                value: withoutMessage,
-                onChanged: (bool? value) {
-                  setState(() {
-                    withoutMessage = value!;
-                  });
-                },
-              ),
-              Text('Nie wysyłaj wiadomości'),
-            ],
-          ),
-          ElevatedButton(
-            onPressed: () => _onChoosePersonPress(context),
-            child: Text('Wybierz z kontaktow'),
-          ),
-          ElevatedButton(
-            onPressed: () => _onSavePress(
-              nameController.text,
-              phoneController.text,
-              wishesController.text,
-              eventNameController.text,
-              reminderController.text,
-            ),
-            child: Text('Zapisz'),
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:urodziny_app/local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'app.dart';
 import 'package:urodziny_app/events.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,5 +20,7 @@ void main() async {
         dynamicEvents?.map((event) => event as Event).toList() ?? [];
     kEvents[keyDateTime] = convertedEvents;
   }
+
+  await initializeDateFormatting();
   runApp(const MyApp());
 }

@@ -110,7 +110,7 @@ class LocalNotifications {
       }
     } else {
       // If it was just one time event scheduled in the past than return
-      if (DateTime.now().isAfter(DateTime(year, month, day))) {
+      if (DateTime.now().isBefore(DateTime(year, month, day))) {
         return;
       }
     }

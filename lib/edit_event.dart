@@ -121,7 +121,7 @@ class _EditEvent extends State<EditEvent> {
   }
 
   _onEditPress() async {
-    setState(() async {
+    setState(() {
       // When we press save:
       if (isEditActive) {
         kEvents[widget._day]?[index].name = nameController.text;
@@ -135,7 +135,7 @@ class _EditEvent extends State<EditEvent> {
         kEvents[widget._day]?[index].reminder = reminderDays;
         _box.put(getHashCode(widget._day), kEvents[widget._day]);
         currentEvent = kEvents[widget._day]?[index];
-        await LocalNotifications.deleteScheduledNotification(
+        LocalNotifications.deleteScheduledNotification(
           widget._day.day,
           widget._day.month,
           currentEvent!,
