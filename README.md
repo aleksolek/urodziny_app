@@ -27,6 +27,6 @@ Main flutter packages used in this project:
 
 ## Screenshots
 
-<img src="screenshots/screenshot1.jpg" style="width:25%; height:auto;">
-<img src="screenshots/screenshot2.jpg" style="width:25%; height:auto;">
-<img src="screenshots/screenshot3.jpg" style="width:25%; height:auto;">
+<img src="screenshots/screenshot1.jpg" style="width:35%; height:auto;">
+<img src="screenshots/screenshot2.jpg" style="width:35%; height:auto;">
+<img src="screenshots/screenshot3.jpg" style="width:35%; height:auto;">
