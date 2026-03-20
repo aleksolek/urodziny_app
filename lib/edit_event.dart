@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:urodziny_app/events.dart';
-import 'package:urodziny_app/app.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:urodziny_app/local_notifications.dart';
 
 class EditEvent extends StatefulWidget {
   final DateTime _day;
   final int _id;
-  EditEvent(this._day, this._id);
+  const EditEvent(this._day, this._id);
   State<EditEvent> createState() => _EditEvent();
 }
 
@@ -43,79 +42,68 @@ class _EditEvent extends State<EditEvent> {
     if (currentEvent == null) return Text('Null event');
     return Scaffold(
       appBar: AppBar(title: Text('Edytuj wydarzenie')),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          isEditActive
-              ? TextField(
-                  controller: nameController,
-                  maxLines: null,
-                  decoration: const InputDecoration(
-                    hintText: "Imię",
-                    hintStyle: TextStyle(color: Colors.grey),
-                    labelStyle: TextStyle(fontSize: 14, color: Colors.black),
-                    labelText: "Imię",
-                  ),
-                )
-              : Text('Imię: ${currentEvent?.name}'),
-          isEditActive
-              ? TextField(
-                  controller: phoneController,
-                  maxLines: null,
-                  decoration: const InputDecoration(
-                    hintText: "Telefon",
-                    hintStyle: TextStyle(color: Colors.grey),
-                    labelStyle: TextStyle(fontSize: 14, color: Colors.black),
-                    labelText: "Telefon",
-                  ),
-                )
-              : Text('Telefon: ${currentEvent?.phone}'),
-          isEditActive
-              ? TextField(
-                  controller: eventNameController,
-                  maxLines: null,
-                  decoration: const InputDecoration(
-                    hintText: "Nazwa wydarzenia",
-                    hintStyle: TextStyle(color: Colors.grey),
-                    labelStyle: TextStyle(fontSize: 14, color: Colors.black),
-                    labelText: "Nazwa wydarzenia",
-                  ),
-                )
-              : Text('Nazwa wydarzenia: ${currentEvent?.eventName}'),
-          isEditActive
-              ? TextField(
-                  controller: wishesController,
-                  maxLines: null,
-                  decoration: const InputDecoration(
-                    hintText: "Życzenia",
-                    hintStyle: TextStyle(color: Colors.grey),
-                    labelStyle: TextStyle(fontSize: 14, color: Colors.black),
-                    labelText: "Życzenia",
-                  ),
-                )
-              : Text('Życzenia: ${currentEvent?.wishes}'),
-          isEditActive
-              ? TextField(
-                  controller: reminderController,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.digitsOnly,
-                  ],
-                  decoration: const InputDecoration(
-                    hintText: "Przypomnienie",
-                    hintStyle: TextStyle(color: Colors.grey),
-                    labelStyle: TextStyle(fontSize: 14, color: Colors.black),
-                    labelText: "Przypomnienie na tyle dni wcześniej",
-                  ),
-                )
-              : Text('Przypomnienie: ${currentEvent?.reminder} dni wcześniej'),
-          ElevatedButton(
-            onPressed: () => _onEditPress(),
-            child: isEditActive ? Text('Zapisz') : Text('Edytuj'),
+      body: SingleChildScrollView(
+        physics: AlwaysScrollableScrollPhysics(),
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                "Imię: ",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+              ),
+              isEditActive
+                  ? TextField(controller: nameController, maxLines: null)
+                  : Text('${currentEvent?.name}'),
+              SizedBox(height: 8),
+              Text(
+                "Telefon: ",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+              ),
+              isEditActive
+                  ? TextField(controller: phoneController, maxLines: null)
+                  : Text('${currentEvent?.phone}'),
+              SizedBox(height: 8),
+              Text(
+                "Nazwa wydarzenia: ",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+              ),
+              isEditActive
+                  ? TextField(controller: eventNameController, maxLines: null)
+                  : Text('${currentEvent?.eventName}'),
+              SizedBox(height: 8),
+              Text(
+                "Życzenia: ",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+              ),
+              isEditActive
+                  ? TextField(controller: wishesController, maxLines: null)
+                  : Text('${currentEvent?.wishes}'),
+              SizedBox(height: 8),
+              Text(
+                "Przypomnienie: ",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+              ),
+              isEditActive
+                  ? TextField(
+                      controller: reminderController,
+                      maxLines: null,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                    )
+                  : Text('${currentEvent?.reminder} dni wcześniej'),
+              SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () => _onEditPress(),
+                child: isEditActive ? Text('Zapisz') : Text('Edytuj'),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

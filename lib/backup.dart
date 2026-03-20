@@ -10,7 +10,7 @@ import 'package:urodziny_app/local_notifications.dart';
 
 class Backup {
   static final box = Hive.box('birthdayEvents');
-  static Future createBackup() async {
+  static Future createBackup(BuildContext context) async {
     if (box.isEmpty) {
       return;
     }
@@ -19,15 +19,17 @@ class Backup {
       final dynamicEvents = box.get(key) as List<dynamic>?;
       List<Event> convertedEvents =
           dynamicEvents?.map((event) => event as Event).toList() ?? [];
-      json += "\"";
-      json += key.toString();
-      json += "\":[";
-      for (Event event in convertedEvents) {
-        json += jsonEncode(event);
-        json += ",";
+      if (convertedEvents.isNotEmpty) {
+        json += "\"";
+        json += key.toString();
+        json += "\":[";
+        for (Event event in convertedEvents) {
+          json += jsonEncode(event);
+          json += ",";
+        }
+        json = json.substring(0, json.length - 1);
+        json += '],';
       }
-      json = json.substring(0, json.length - 1);
-      json += '],';
     }
     if (json.endsWith(',')) {
       json = json.substring(0, json.length - 1);
@@ -39,9 +41,12 @@ class Backup {
         .replaceAll('.', '-')
         .replaceAll(' ', '-')
         .replaceAll(':', '-');
-    String path = '${dir}$formattedDate.json';
+    String path = '${dir}KalendarzUrodzinBackup$formattedDate.json';
     File backupFile = File(path);
     await backupFile.writeAsString(json);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Eksport zakonczony sukcesem')),
+    );
   }
 
   static Future importBackup(BuildContext context) async {

@@ -206,7 +206,6 @@ class _AddBirthdayState extends State<AddBirthday> {
     );
 
     if (kEvents[date] == null) {
-      print('Lista na ten dzien nie istnieje jeszcze');
       final growableList = List<Event>.empty(growable: true);
       growableList.add(birthday);
       kEvents[date] = growableList;
@@ -220,10 +219,8 @@ class _AddBirthdayState extends State<AddBirthday> {
         return;
       }
       kEvents[date]?.add(birthday);
-      print(birthday);
     }
     List<Event> tempList = kEvents[date] as List<Event>;
-    print(tempList);
     _box.put(getHashCode(date), tempList);
     LocalNotifications.scheduleNotification(date.day, date.month, birthday);
     Navigator.pop(context);
@@ -245,7 +242,7 @@ int generateEventId(DateTime key) {
   if (kEvents[key] == null) {
     return 0;
   }
-  int eventId = 1;
+  int eventId = 0;
   while (true) {
     bool idUsed = false;
     for (int j = 0; j < kEvents[key]!.length; j++) {

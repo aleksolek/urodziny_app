@@ -92,14 +92,11 @@ class _Calendar extends State<Calendar> {
         ],
       ),
     );
-    print("Delete: $delete");
     if (delete == false) {
       return;
     }
     final int index = getIndexFromId(_selectedDay, id);
     if (index == -1) return;
-    print("Deleting event index: $index for day $_selectedDay");
-    print("${kEvents[_selectedDay]?[index]}");
     await LocalNotifications.deleteScheduledNotification(
       _selectedDay!.day,
       _selectedDay!.month,
@@ -254,7 +251,7 @@ class _Calendar extends State<Calendar> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               ElevatedButton(
-                onPressed: () => Backup.createBackup(),
+                onPressed: () => Backup.createBackup(context),
                 child: Text('Eksportuj kalendarz'),
               ),
               ElevatedButton(

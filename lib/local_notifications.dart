@@ -4,8 +4,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:urodziny_app/events.dart';
-import 'package:urodziny_app/url.dart';
-import 'package:url_launcher/link.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const int NUMBER_OF_YEARS = 30;
@@ -95,9 +93,6 @@ class LocalNotifications {
   }
 
   static Future scheduleNotification(int day, int month, Event event) async {
-    print(
-      "Scheduling notification for the day: $day month: $month id: ${event.id}",
-    );
     int yearsNumber = 1;
     int year = event.year;
     if (year == 0) {
@@ -110,7 +105,7 @@ class LocalNotifications {
       }
     } else {
       // If it was just one time event scheduled in the past than return
-      if (DateTime.now().isBefore(DateTime(year, month, day))) {
+      if (DateTime.now().isAfter(DateTime(year, month, day))) {
         return;
       }
     }
@@ -129,23 +124,28 @@ class LocalNotifications {
         ? 'Urodziny ${event.name}!'
         : event.eventName;
     for (var i = 0; i < yearsNumber; i++) {
+      int baseNotificationId = getNotificationId(day, month, event.id) + i;
+      int reminderNotificationId =
+          getNotificationId(reminderDate.day, reminderDate.month, event.id) +
+          100 +
+          i;
       // Main notification
       scheduleZonedNotification(
         day,
         month,
         year + i,
-        event.id + i,
+        baseNotificationId,
         notificationTitle,
         'Nie zapomnij czegoś napisać!',
         fullPayload,
       );
       // Reminder
-      if (DateTime.now().isAfter(reminderDate)) {
+      if (event.reminder != 0 && DateTime.now().isBefore(reminderDate)) {
         scheduleZonedNotification(
           reminderDate.day,
           reminderDate.month,
           reminderDate.year + i,
-          event.id + i,
+          reminderNotificationId,
           notificationTitle,
           'Przygotuj się! To już niedługo: $day/$month',
           '',
@@ -186,14 +186,12 @@ class LocalNotifications {
   static void onClickNotification(
     NotificationResponse notificationResponse,
   ) async {
-    print("Notyfikacja kliknieta");
     if (notificationResponse.payload == null ||
         notificationResponse.payload == "") {
       return;
     }
     var payloadData = jsonDecode(notificationResponse.payload as String);
     if (payloadData["messageDisabled"] == false) {
-      print("Po zdekodowaniu: ${payloadData["wishes"]}");
       final Uri toLaunch = Uri(
         scheme: 'https',
         host: 'wa.me',
@@ -201,17 +199,15 @@ class LocalNotifications {
         queryParameters: {"text": payloadData["wishes"]},
       );
       // Url.LaunchInBrowser(toLaunch);
-      print("Launching");
       if (!await launchUrl(toLaunch, mode: LaunchMode.externalApplication)) {
         throw Exception('Could not launch $toLaunch');
       }
-      print("Launched");
     }
   }
 
   static String strip(String str, String charactersToRemove) {
     String escapedChars = RegExp.escape(charactersToRemove);
-    RegExp regex = new RegExp(
+    RegExp regex = RegExp(
       r"^[" + escapedChars + r"]+|[" + escapedChars + r']+$',
     );
     String newStr = str.replaceAll(regex, '').trim();
